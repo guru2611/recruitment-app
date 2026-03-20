@@ -46,6 +46,8 @@ with get_connection() as conn:
 4. Agent 4 — queues Bolna outbound call, saves `execution_id`, **does NOT send invite yet**
 5. Poll (`--poll` or "🔄 Check Call Results" button in Interview Feedback page) — fetches Bolna execution, parses chosen slot from transcript, saves to `candidates.interview_date`, sends `.ics` invite via Gmail SMTP
 
+**Dashboard pages:** Upload CV · Overview · Job Descriptions · Candidates · Interview Feedback · Match Scores · Architecture. All pages are in `dashboard.py` as `elif page == "..."` blocks. The sidebar uses `st.radio` for navigation.
+
 **Idempotency:** `planner_agent.py` checks DB state before each step and skips agents where work is already complete. Re-running the full pipeline is safe — already-matched CVs, extracted candidates, and queued calls are not re-processed.
 
 **No-match handling:** After Agent 1, the dashboard checks `matches WHERE match_score >= 70`. If none, all remaining agents are marked skipped and a styled "Not a Match" card is shown. Balloons/success only fire when the CV matched.

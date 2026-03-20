@@ -64,6 +64,16 @@ streamlit run dashboard.py
 
 Upload a CV from the **Upload CV** tab — the pipeline runs automatically.
 
+| Tab | Description |
+|-----|-------------|
+| 📤 Upload CV | Upload a PDF CV and run the full pipeline |
+| 📊 Overview | Metrics, funnel chart, and interview status breakdown |
+| 💼 Job Descriptions | Browse loaded JDs with applicant and match counts |
+| 👥 Candidates | Cards for all matched candidates with contact and status info |
+| ✍️ Interview Feedback | Poll Bolna call results, update status, add notes and ratings |
+| 📈 Match Scores | All CV×JD scores with match/no-match badges |
+| 🏗 Architecture | System architecture diagram |
+
 ### CLI
 
 ```bash

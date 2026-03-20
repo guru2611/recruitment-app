@@ -103,6 +103,19 @@ def update_feedback(candidate_id, status, feedback, interview_date, rating):
             interview_date=?, rating=? WHERE candidate_id=?
         """, (status, feedback, interview_date, rating, candidate_id))
 
+def get_job_descriptions():
+    with get_connection() as conn:
+        rows = conn.execute("""
+            SELECT jd.jd_id, jd.title, jd.content, jd.created_at,
+                   COUNT(m.candidate_id) AS total_applicants,
+                   SUM(CASE WHEN m.match_score >= 70 THEN 1 ELSE 0 END) AS matched
+            FROM job_descriptions jd
+            LEFT JOIN matches m ON m.jd_id = jd.jd_id
+            GROUP BY jd.jd_id
+            ORDER BY jd.created_at DESC
+        """).fetchall()
+        return [dict(r) for r in rows]
+
 def get_all_scores():
     with get_connection() as conn:
         rows = conn.execute("""
@@ -131,6 +144,7 @@ with st.sidebar:
     page = st.radio("Navigate", [
         "📤 Upload CV",
         "📊 Overview",
+        "💼 Job Descriptions",
         "👥 Candidates",
         "✍️ Interview Feedback",
         "📈 Match Scores",
@@ -339,6 +353,40 @@ elif page == "📊 Overview":
             s = c["interview_status"] or "Pending"
             statuses[s] = statuses.get(s, 0) + 1
         st.bar_chart(pd.DataFrame(list(statuses.items()), columns=["Status", "Count"]).set_index("Status"))
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PAGE: Job Descriptions
+# ══════════════════════════════════════════════════════════════════════════════
+elif page == "💼 Job Descriptions":
+    st.title("💼 Job Descriptions")
+    st.caption("All JDs loaded from the job_descriptions folder.")
+
+    jds = get_job_descriptions()
+    if not jds:
+        st.info("No job descriptions found. Add PDF or TXT files to `data/job_descriptions/` and run the pipeline.")
+    else:
+        st.caption(f"{len(jds)} job description{'s' if len(jds) != 1 else ''} loaded")
+        for jd in jds:
+            matched   = jd["matched"] or 0
+            total     = jd["total_applicants"] or 0
+            match_pct = f"{matched}/{total} matched" if total else "No CVs screened yet"
+            badge_color = "#059669" if matched > 0 else "#94a3b8"
+
+            with st.expander(f"**{jd['title']}**  —  {match_pct}", expanded=False):
+                col1, col2, col3 = st.columns(3)
+                col1.metric("Total Applicants", total)
+                col2.metric("Matched (≥70)", matched)
+                col3.metric("Match Rate", f"{int(matched/total*100)}%" if total else "—")
+                st.divider()
+                st.text_area(
+                    "Job Description Content",
+                    value=jd["content"],
+                    height=300,
+                    disabled=True,
+                    label_visibility="collapsed",
+                    key=f"jd_content_{jd['jd_id']}",
+                )
 
 
 # ══════════════════════════════════════════════════════════════════════════════
