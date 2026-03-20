@@ -32,6 +32,13 @@ def load_env():
 load_env()
 init_db()
 
+# Pre-load JDs from disk into DB on startup
+try:
+    from agents.agent1_cv_matcher import load_jds as _load_jds
+    _load_jds()
+except Exception:
+    pass
+
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Recruitment Pipeline", page_icon="🎯", layout="wide")
 
