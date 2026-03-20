@@ -1,0 +1,5 @@
+anthropic>=0.40.0
+pdfplumber>=0.11.0
+pywhatkit>=5.4
+requests>=2.31.0
+rich>=13.7.0
